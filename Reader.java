@@ -62,31 +62,8 @@ public class Reader{
 		}
 	}
 
-	public static void main(String[] args) throws FileNotFoundException
+	private static void filterEdges()
 	{
-		storeFiles();
-
-		//Take the input from a file into a 2D ArrayList
-		for(int i = 0; i < HEIGHT; i++)
-		  inputPixels.add(new ArrayList<Double>(WIDTH));
-		try
-		{
-		  Scanner fileScanner = new Scanner(new File(allFiles.get(0)));
-		  for(int i = 0; i < HEIGHT; i++)
-		  {
-		    for(int j = 0; j < WIDTH; j++)
-		      if(fileScanner.hasNextDouble())
-		      {
-			inputPixels.get(i).add(fileScanner.nextDouble());
-			//System.out.print(inputPixels.get(i).get(j) + " ");
-		      }
-		    //System.out.println();
-		  }
-		}
-		catch(FileNotFoundException ex)
-		{
-
-		}
 
 		//Perform matrix multiplication to each 3x3 input sub-matrix to filter out the edges
 		//Produces matrix of dimensions 126x118
@@ -125,10 +102,58 @@ public class Reader{
 		    	hiddenPixels.add(sum);
 		  }
 		}
-
-		System.out.println("Size: " + hiddenPixels.size());
 		System.out.println("Size: " + inputPixels.size()*inputPixels.get(0).size());
+	}
 
+	private static void printFirstHiddenLayer() throws IOException
+	{
+		try
+		{
+			File file = new File("./HiddenLayer.txt");
+			FileWriter writer = new FileWriter(file);
+			for(int i = 0; i < HEIGHT-2; i++)
+			{
+			  for(int j = 0; j < WIDTH-2; j++)
+			    writer.write(hiddenPixels.get(i*(WIDTH-2)+j) + " ");
+			  writer.write("\n");
+			}
+			writer.close();
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	private static void processInput(Scanner s)
+	{
+		  for(int i = 0; i < HEIGHT; i++)
+		  {
+		    for(int j = 0; j < WIDTH; j++)
+		      if(s.hasNextDouble())
+			inputPixels.get(i).add(s.nextDouble());
+		  }
+
+	}
+	public static void main(String[] args) throws Exception
+	{
+		storeFiles();	
+		for(int i = 0; i < HEIGHT; i++)
+		  inputPixels.add(new ArrayList<Double>(WIDTH));
+
+		try
+		{
+		  File f = new File(allFiles.get(0));
+		  Scanner fileScanner = new Scanner(f);
+		  processInput(fileScanner);
+		}
+		catch(Exception ex)
+		{
+		  System.err.println("File not found. Abort.\n");
+		  System.exit(1);
+		}
+		filterEdges();
+		printFirstHiddenLayer();	
 	}
 }
 
