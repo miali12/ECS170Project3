@@ -15,7 +15,8 @@ public class Reader{
 	static File[] maleFiles, femaleFiles, testFiles;
 	static ArrayList<String> allFiles = new ArrayList<String>();
 	static List<List<Double>> inputPixels = new ArrayList<List<Double>>(HEIGHT);
-	static ArrayList<Double> hiddenPixels = new ArrayList<Double>();
+	static ArrayList<Double> edgePixels = new ArrayList<Double>();
+	static ArrayList<Double> poolingPixels = new ArrayList<Double>();
 
 	private static double sigmoidFunction(int x)
 	{
@@ -62,7 +63,7 @@ public class Reader{
 		}
 	}
 
-	private static void filterEdges()
+	private static void convolutionLayer()
 	{
 
 		//Perform matrix multiplication to each 3x3 input sub-matrix to filter out the edges
@@ -75,8 +76,7 @@ public class Reader{
 		  for(int j = 0; j < WIDTH; j++)
 		  {
 		    sum = 0;
-		    nextCol = false;
-		    nextRow = false;
+		    nextCol = nextRow = false;
 		    for(int y = 0; y < 3; y++)
 		    {
 			if(i+y >= HEIGHT)
@@ -99,10 +99,56 @@ public class Reader{
 		    if(nextCol || nextRow)
 			break;
 		    else
-		    	hiddenPixels.add(sum);
+		    	edgePixels.add(sum);
 		  }
 		}
-		System.out.println("Size: " + inputPixels.size()*inputPixels.get(0).size());
+	}
+
+	private static void ReLULayer()
+	{//Set every negative value to 0
+		for(int i = 0; i < edgePixels.size(); i++)
+		  if(edgePixels.get(i) < 0)
+			edgePixels.set(i, 0.0);
+	}
+
+	private static void poolingLayer()
+	{
+		int height = HEIGHT-2;
+		int width = WIDTH-2;
+		boolean nextCol, nextRow;
+		double max;
+		for(int i = 0; i < height; i++)
+		{
+		  for(int j = 0; j < width; j++)
+		  {
+		    max = -9000;
+		    nextCol = nextRow = false;
+		    for(int y = 0; y < 2; y++)
+		    {
+		      if(i+y >= height)
+		      {
+			nextCol = true;
+			break;
+		      }
+		      for(int x = 0; x < 2; x++)
+		      {
+			if(j+x >= width)
+			{
+			  nextRow = true;
+			  break;
+			}
+			if(edgePixels.get((i*width)+j) > max)
+			  max = edgePixels.get((i*width)+j);
+		      }
+		      if(nextRow)
+			break;
+		    }
+		    if(nextCol || nextRow)
+			break;
+		    else
+		    	poolingPixels.add(max);
+		  }
+		}
 	}
 
 	private static void printFirstHiddenLayer() throws IOException
@@ -114,7 +160,7 @@ public class Reader{
 			for(int i = 0; i < HEIGHT-2; i++)
 			{
 			  for(int j = 0; j < WIDTH-2; j++)
-			    writer.write(hiddenPixels.get(i*(WIDTH-2)+j) + " ");
+			    writer.write(edgePixels.get(i*(WIDTH-2)+j) + " ");
 			  writer.write("\n");
 			}
 			writer.close();
@@ -152,8 +198,9 @@ public class Reader{
 		  System.err.println("File not found. Abort.\n");
 		  System.exit(1);
 		}
-		filterEdges();
-		printFirstHiddenLayer();	
+		convolutionLayer();
+		ReLULayer();
+		poolingLayer();
 	}
 }
 
