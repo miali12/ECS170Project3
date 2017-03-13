@@ -89,6 +89,7 @@ public class Reader{
 		}
 
 		//Perform matrix multiplication to each 3x3 input sub-matrix to filter out the edges
+		//Produces matrix of dimensions 126x118
 		double sum;
 		boolean nextCol;
 		boolean nextRow;
@@ -115,8 +116,13 @@ public class Reader{
 				}
 				sum += inputPixels.get(i+y).get(j+x)*edgeDetector[y][x];
 			}
+			if(nextRow)
+			  break;
 		    }
-		    hiddenPixels.add(sum);
+		    if(nextCol || nextRow)
+			break;
+		    else
+		    	hiddenPixels.add(sum);
 		  }
 		}
 
