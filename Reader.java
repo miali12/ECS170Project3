@@ -5,8 +5,8 @@ import java.nio.file.*;
 
 public class Reader{
 
-	final int HEIGHT = 128;
-	final int WIDTH = 120;
+	final static int HEIGHT = 128;
+	final static int WIDTH = 120;
 	public static void main(String[] args) throws FileNotFoundException
 	{
 		String str;
@@ -45,11 +45,17 @@ public class Reader{
 		try
 		{
 		  //Testing to see if input file is stored in 2D ArrayList
-		  Scanner fileScanner = new Scanner(allFiles.get(0));
+		  Scanner fileScanner = new Scanner(new File(allFiles.get(0)));
 		  for(int i = 0; i < HEIGHT; i++)
+		  {
 		    for(int j = 0; j < WIDTH; j++)
 		      if(fileScanner.hasNextInt())
+		      {
 			integers.get(i).add(fileScanner.nextInt());
+			System.out.print(integers.get(i).get(j) + " ");
+		      }
+		    System.out.println();
+		  }
 		}
 		catch(FileNotFoundException ex)
 		{
