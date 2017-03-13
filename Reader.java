@@ -45,7 +45,7 @@ public class Reader{
 		try
 		{
 		  //Testing to see if input file is stored in 2D ArrayList
-		  Scanner fileScanner = new Scanner(maleFiles[1]);
+		  Scanner fileScanner = new Scanner(allFiles.get(0));
 		  for(int i = 0; i < HEIGHT; i++)
 		    for(int j = 0; j < WIDTH; j++)
 		      if(fileScanner.hasNextInt())
