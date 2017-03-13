@@ -39,9 +39,9 @@ public class Reader{
 		  }
 		}
 
-		List<List<Integer>> integers = new ArrayList<List<Integer>>(HEIGHT);
+		List<List<Integer>> pixels = new ArrayList<List<Integer>>(HEIGHT);
 		for(int i = 0; i < HEIGHT; i++)
-		  integers.add(new ArrayList<Integer>(WIDTH));
+		  pixels.add(new ArrayList<Integer>(WIDTH));
 		try
 		{
 		  //Testing to see if input file is stored in 2D ArrayList
@@ -51,8 +51,8 @@ public class Reader{
 		    for(int j = 0; j < WIDTH; j++)
 		      if(fileScanner.hasNextInt())
 		      {
-			integers.get(i).add(fileScanner.nextInt());
-			System.out.print(integers.get(i).get(j) + " ");
+			pixels.get(i).add(fileScanner.nextInt());
+			System.out.print(pixels.get(i).get(j) + " ");
 		      }
 		    System.out.println();
 		  }
