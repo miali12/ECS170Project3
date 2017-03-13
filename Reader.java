@@ -5,8 +5,8 @@ import java.nio.file.*;
 
 public class Reader{
 
-	final static int HEIGHT = 128;
-	final static int WIDTH = 120;
+	static int HEIGHT = 128;
+	static int WIDTH = 120;
 	final static int[][] edgeDetector =
 		{{0, 1, 0},
 		{1, -4, 1},
@@ -14,7 +14,7 @@ public class Reader{
 
 	static File[] maleFiles, femaleFiles, testFiles;
 	static ArrayList<String> allFiles = new ArrayList<String>();
-	static List<List<Double>> inputPixels = new ArrayList<List<Double>>(HEIGHT);
+	static ArrayList<Double> inputPixels = new ArrayList<Double>();
 	static ArrayList<Double> edgePixels = new ArrayList<Double>();
 	static ArrayList<Double> poolingPixels = new ArrayList<Double>();
 
@@ -24,7 +24,7 @@ public class Reader{
 	}
 
 	private static void storeFiles()
-	{
+	{//Store the files in the appropriate data structure
 		String str;
 		File m = null, f = null, t = null;
 
@@ -64,13 +64,11 @@ public class Reader{
 	}
 
 	private static void convolutionLayer()
-	{
-
-		//Perform matrix multiplication to each 3x3 input sub-matrix to filter out the edges
-		//Produces matrix of dimensions 126x118
+	{//Perform matrix multiplication to each 3x3 input sub-matrix to filter out the edges
 		double sum;
 		boolean nextCol;
 		boolean nextRow;
+		edgePixels.clear();
 		for(int i = 0; i < HEIGHT; i++)
 		{
 		  for(int j = 0; j < WIDTH; j++)
@@ -91,7 +89,7 @@ public class Reader{
 				  nextRow = true;
 				  break;
 				}
-				sum += inputPixels.get(i+y).get(j+x)*edgeDetector[y][x];
+				sum += inputPixels.get((i*WIDTH)+j)*edgeDetector[y][x];
 			}
 			if(nextRow)
 			  break;
@@ -102,6 +100,8 @@ public class Reader{
 		    	edgePixels.add(sum);
 		  }
 		}
+		HEIGHT -= 2;
+		WIDTH -= 2;
 	}
 
 	private static void ReLULayer()
@@ -112,33 +112,32 @@ public class Reader{
 	}
 
 	private static void poolingLayer()
-	{
-		int height = HEIGHT-2;
-		int width = WIDTH-2;
+	{//Filter each location with a 2x2 matrix that takes the max value within that domain
 		boolean nextCol, nextRow;
 		double max;
-		for(int i = 0; i < height; i++)
+		poolingPixels.clear();
+		for(int i = 0; i < HEIGHT; i++)
 		{
-		  for(int j = 0; j < width; j++)
+		  for(int j = 0; j < WIDTH; j++)
 		  {
 		    max = -9000;
 		    nextCol = nextRow = false;
 		    for(int y = 0; y < 2; y++)
 		    {
-		      if(i+y >= height)
+		      if(i+y >= HEIGHT)
 		      {
 			nextCol = true;
 			break;
 		      }
 		      for(int x = 0; x < 2; x++)
 		      {
-			if(j+x >= width)
+			if(j+x >= WIDTH)
 			{
 			  nextRow = true;
 			  break;
 			}
-			if(edgePixels.get((i*width)+j) > max)
-			  max = edgePixels.get((i*width)+j);
+			if(edgePixels.get((i*WIDTH)+j) > max)
+			  max = edgePixels.get((i*WIDTH)+j);
 		      }
 		      if(nextRow)
 			break;
@@ -149,6 +148,18 @@ public class Reader{
 		    	poolingPixels.add(max);
 		  }
 		}
+
+		HEIGHT -= 1;
+		WIDTH -= 1;
+
+		//Transfer over the pooling array to initial array for the next iteration
+		int offset = inputPixels.size() - poolingPixels.size();
+		while(offset-- > 0)
+		  inputPixels.remove(inputPixels.size()-1);
+
+		for(int i = 0; i < HEIGHT; i++)
+		  for(int j = 0; j < WIDTH; j++)
+		    inputPixels.set((i*WIDTH)+j, poolingPixels.get((i*WIDTH)+j));
 	}
 
 	private static void printFirstHiddenLayer() throws IOException
@@ -173,19 +184,14 @@ public class Reader{
 
 	private static void processInput(Scanner s)
 	{
-		  for(int i = 0; i < HEIGHT; i++)
-		  {
-		    for(int j = 0; j < WIDTH; j++)
+		  for(int i = 0; i < HEIGHT*WIDTH; i++)
 		      if(s.hasNextDouble())
-			inputPixels.get(i).add(s.nextDouble());
-		  }
-
+			inputPixels.add(s.nextDouble());
 	}
+
 	public static void main(String[] args) throws Exception
 	{
-		storeFiles();	
-		for(int i = 0; i < HEIGHT; i++)
-		  inputPixels.add(new ArrayList<Double>(WIDTH));
+		storeFiles();
 
 		try
 		{
@@ -198,9 +204,14 @@ public class Reader{
 		  System.err.println("File not found. Abort.\n");
 		  System.exit(1);
 		}
-		convolutionLayer();
-		ReLULayer();
-		poolingLayer();
+
+		int i = 10;
+		while(i-- > 0)
+		{
+			convolutionLayer();
+			ReLULayer();
+			poolingLayer();
+		}
 	}
 }
 
