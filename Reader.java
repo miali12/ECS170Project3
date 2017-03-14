@@ -79,16 +79,21 @@ public class Reader{
 	  firstWeights.clear();
 	  secondWeights.clear();
 	  Random r = new Random();
+
+	  //Weights between input layer and hidden layer
 	  for(int i = 0; i < HEIGHT*WIDTH*NUMNODES; i++)
 		firstWeights.add(r.nextGaussian());
+
+	  //Weights between hidden layer and output layer
 	  for(int i = 0; i < NUMNODES; i++)
 		secondWeights.add(r.nextGaussian());
 		
 	}
 
-	private static void initializeHiddenLayer()
+	private static void computeHiddenLayer()
 	{
 	  int sum;
+	  hiddenNodes.clear();
 	  for(int i = 0; i < NUMNODES; i++)
 	  {
 	    sum = 0;
@@ -121,17 +126,9 @@ public class Reader{
 		  System.err.println("File not found. Abort.\n");
 		  System.exit(1);
 		}
-		initializeHiddenLayer();
+		computeHiddenLayer();
 	}
 }
-
-
-
-
-
-
-
-
 
 
 
