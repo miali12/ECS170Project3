@@ -7,10 +7,13 @@ public class Reader{
 	public static class Node
 	{//Structure for every hidden-layer instance
 	  static double sum;
+	  static double sigmoidSum;
 	  static double delta;
-	  public Node(double s, double d)
+	  public Node(){}
+	  public Node(double s, double ss, double d)
 	  {
 	    sum = s;
+	    sigmoidSum = ss;
 	    delta = d;
 	  }
 	}
@@ -28,6 +31,7 @@ public class Reader{
 	static ArrayList<Double> secondWeights = new ArrayList<Double>();
 	//Size of 32 - stores all hidden layer nodes
 	static ArrayList<Node> hiddenNodes = new ArrayList<Node>();
+	static Node outputNode = new Node();
 
 	private static double sigmoidFunction(double x)
 	{
@@ -99,8 +103,18 @@ public class Reader{
 	    sum = 0;
 	    for(int j = 0; j < HEIGHT*WIDTH; j++)
 	      sum += inputPixels.get(j)*firstWeights.get((i*NUMNODES)+j);
-	    hiddenNodes.add(new Node(sum, 0));
+	    hiddenNodes.add(new Node(sum, sigmoidFunction(sum), 0));
 	  }
+	}
+
+	private static void computeOutput()
+	{
+	  int sum = 0;
+	  for(int i = 0; i < NUMNODES; i++)
+	    sum += hiddenNodes.get(i).sum*secondWeights.get(i);
+	  outputNode.sum = sum;
+	  outputNode.sigmoidSum = sigmoidFunction(sum);
+	  outputNode.delta = 0;
 	}
 
 	private static void processInput(Scanner s)
@@ -127,6 +141,7 @@ public class Reader{
 		  System.exit(1);
 		}
 		computeHiddenLayer();
+		computeOutput();
 	}
 }
 
