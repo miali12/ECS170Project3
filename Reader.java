@@ -38,6 +38,11 @@ public class Reader{
 		return (1/(1+Math.pow(Math.E,-x)));
 	}
 
+	private static double sigmoidDerivative(double x)
+	{
+		return sigmoidFunction(x)-(1-sigmoidFunction(x));
+	}
+
 	private static void storeFiles()
 	{//Store the files in the appropriate data structure
 		String str;
@@ -127,7 +132,7 @@ public class Reader{
 	public static void main(String[] args) throws Exception
 	{
 		storeFiles();
-
+	//Forward propagation
 		gaussianWeights();
 		try
 		{
@@ -142,6 +147,7 @@ public class Reader{
 		}
 		computeHiddenLayer();
 		computeOutput();
+	//Backward propagation
 	}
 }
 
