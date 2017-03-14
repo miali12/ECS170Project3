@@ -2,14 +2,17 @@ import java.util.*;
 import java.io.*;
 import java.nio.file.*;
 
-
 public class Reader{
 
-	class Node
+	public static class Node
 	{//Structure for every hidden-layer instance
-	  double sum;
-	  double sigmoidSum;
-	  double delta;
+	  static double sum;
+	  static double delta;
+	  public Node(double s, double d)
+	  {
+	    sum = s;
+	    delta = d;
+	  }
 	}
 	static int HEIGHT = 128;
 	static int WIDTH = 120;
@@ -26,7 +29,7 @@ public class Reader{
 	//Size of 32 - stores all hidden layer nodes
 	static ArrayList<Node> hiddenNodes = new ArrayList<Node>();
 
-	private static double sigmoidFunction(int x)
+	private static double sigmoidFunction(double x)
 	{
 		return (1/(1+Math.pow(Math.E,-x)));
 	}
@@ -83,6 +86,18 @@ public class Reader{
 		
 	}
 
+	private static void initializeHiddenLayer()
+	{
+	  int sum;
+	  for(int i = 0; i < NUMNODES; i++)
+	  {
+	    sum = 0;
+	    for(int j = 0; j < HEIGHT*WIDTH; j++)
+	      sum += inputPixels.get(j)*firstWeights.get((i*NUMNODES)+j);
+	    hiddenNodes.add(new Node(sum, 0));
+	  }
+	}
+
 	private static void processInput(Scanner s)
 	{
 		  for(int i = 0; i < HEIGHT*WIDTH; i++)
@@ -106,6 +121,7 @@ public class Reader{
 		  System.err.println("File not found. Abort.\n");
 		  System.exit(1);
 		}
+		initializeHiddenLayer();
 	}
 }
 
